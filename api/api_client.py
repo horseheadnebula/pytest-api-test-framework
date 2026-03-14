@@ -41,7 +41,6 @@ class BaseApiClient:
             **kwargs,
         )
 
-        response.raise_for_status()
         return response
 
     def get(self, path: str, params: Optional[dict] = None):

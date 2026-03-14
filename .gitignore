@@ -1,2 +1,7 @@
 venv/
 README.md
+.pytest_cache
+models/__pycache__
+api/__pycache__
+config/__pycache__
+test/__pycache__

@@ -9,5 +9,3 @@ BASE_URLS = {
 }
 
 BASE_URL = BASE_URLS[ENV]
-
-TIMEOUT = 5
