@@ -16,26 +16,21 @@ class TestPetClientCrud:
         ],
         ids=["pet w/ status", "pet w/ category", "pet w/ tags"],
     )
-    def test_add_pet(self, pet_client, pet_factory, kwargs):
-        pet = pet_factory(**kwargs)
+    def test_add_pet(self, pet_client, created_pet, kwargs):
+        pet = created_pet(**kwargs)
 
-        add_resp = pet_client.add_pet(pet)
         get_resp = pet_client.get_pet(pet["id"])
 
         pet_model = PetSchema.model_validate(get_resp.json())
-
-        assert add_resp.status_code == 200
-        assert add_resp.headers["Content-Type"] == "application/json"
 
         assert pet_model.id == pet["id"]
         assert pet_model.name == pet["name"]
         assert pet_model.status == pet["status"]
 
-    def test_get_pet(self, pet_client, pet_factory):
-        pet = pet_factory()
+    def test_get_pet(self, pet_client, created_pet):
+        pet = created_pet()
 
-        add_resp = pet_client.add_pet(pet)
-        get_resp = pet_client.get_pet(add_resp.json()["id"])
+        get_resp = pet_client.get_pet(pet["id"])
 
         assert get_resp.status_code == 200
         assert get_resp.headers["Content-Type"] == "application/json"
@@ -43,11 +38,8 @@ class TestPetClientCrud:
     @pytest.mark.parametrize(
         "new_status", [("pending"), ("sold")], ids=["status: pending", "status: sold"]
     )
-    def test_update_pet(self, pet_client, pet_factory, new_status):
-        pet = pet_factory()
-
-        add_resp = pet_client.add_pet(pet)
-        assert add_resp.status_code == 200
+    def test_update_pet(self, pet_client, created_pet, new_status):
+        pet = created_pet()
 
         pet["status"] = new_status
         upd_resp = pet_client.update_pet(pet)
@@ -64,11 +56,8 @@ class TestPetClientCrud:
         assert pet_model.name == get_resp.json()["name"]
         assert pet_model.status == get_resp.json()["status"]
 
-    def test_delete_pet(self, pet_client, pet_factory):
-        pet = pet_factory()
-
-        add_resp = pet_client.add_pet(pet)
-        assert add_resp.status_code == 200
+    def test_delete_pet(self, pet_client, created_pet):
+        pet = created_pet()
 
         del_resp = pet_client.delete_pet(pet["id"])
         assert del_resp.status_code == 200

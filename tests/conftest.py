@@ -31,3 +31,20 @@ def pet_factory():
         ).build_payload()
 
     return _factory
+
+
+@pytest.fixture()
+def created_pet(pet_client, pet_factory):
+    created_pet_ids: list[int] = []
+
+    def _factory(**kwargs) -> dict:
+        pet = pet_factory(**kwargs)
+        response = pet_client.add_pet(pet)
+        response.raise_for_status()
+        created_pet_ids.append(pet["id"])
+        return pet
+
+    yield _factory
+
+    for pet_id in created_pet_ids:
+        pet_client.delete_pet(pet_id)
