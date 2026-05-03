@@ -1,8 +1,12 @@
+import logging
+import time
 from typing import Optional
 
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+
+logger = logging.getLogger(__name__)
 
 
 class BaseApiClient:
@@ -33,13 +37,20 @@ class BaseApiClient:
 
     def _request(self, method: str, path: str, **kwargs):
         full_url = f"{self.url}{path}"
+        logger.info("--> %s %s", method, full_url)
 
+        start = time.monotonic()
         response = self.session.request(
             method=method,
             url=full_url,
             timeout=kwargs.pop("timeout", self.timeout),
             **kwargs,
         )
+        elapsed = time.monotonic() - start
+
+        logger.info("<-- %s %s (%.3fs)", response.status_code, full_url, elapsed)
+        if not response.ok:
+            logger.warning("Response body: %s", response.text[:500])
 
         return response
 

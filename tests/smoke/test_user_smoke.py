@@ -1,3 +1,7 @@
+import pytest
+
+
+@pytest.mark.smoke
 class TestUserSmoke:
     def test_create_and_get_user_is_alive(self, user_client, created_user):
         user = created_user()

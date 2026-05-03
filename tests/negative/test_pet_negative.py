@@ -4,7 +4,12 @@ import pytest
 
 @allure.epic("Pet Store API")
 @allure.feature("Pet")
+@pytest.mark.negative
 class TestPetClientNegative:
+    @pytest.mark.xfail(
+        reason="Petstore не валидирует входные данные, баг на стороне API",
+        strict=True,  # если вдруг починят — тест станет красным
+    )
     def test_add_pet_with_empty_payload_returns_error(self, pet_client):
         add_resp = pet_client.add_pet({})
 
@@ -20,6 +25,10 @@ class TestPetClientNegative:
 
         assert get_resp.status_code == 404
 
+    @pytest.mark.xfail(
+        reason="Petstore не валидирует входные данные, баг на стороне API",
+        strict=True,
+    )
     def test_update_pet_without_id_returns_error(self, pet_client):
         payload = {"name": "broken-pet", "photoUrls": ["https://example.com/pet.jpg"]}
 
@@ -37,16 +46,24 @@ class TestPetClientNegative:
 
         assert del_resp.status_code in (400, 404, 405)
 
+    @pytest.mark.xfail(
+        reason="Petstore не валидирует входные данные, баг на стороне API",
+        strict=True,
+    )
     def test_get_pet_with_string_id_returns_error(self, pet_client):
         """ID питомца должен быть числом, строка — ошибка."""
         resp = pet_client.get_pet("abc")
 
         assert resp.status_code == 400  # Bad Request
 
+    @pytest.mark.xfail(
+        reason="Petstore не валидирует входные данные, баг на стороне API",
+        strict=True,
+    )
     @pytest.mark.parametrize(
         "invalid_name",
         ["", "a" * 500],
-        ids=["пустое имя", "слишком длинное имя"],
+        ids=["empty name", "very long name"],
     )
     def test_add_pet_with_invalid_name(self, pet_client, pet_factory, invalid_name):
         """Граничные значения для поля name."""
@@ -56,6 +73,10 @@ class TestPetClientNegative:
 
         assert resp.status_code in (400, 405, 422)
 
+    @pytest.mark.xfail(
+        reason="Petstore не валидирует входные данные, баг на стороне API",
+        strict=True,
+    )
     def test_add_pet_with_invalid_status(self, pet_client, pet_factory):
         """Статус должен быть одним из available/pending/sold."""
         payload = pet_factory(status="flying")  # несуществующий статус

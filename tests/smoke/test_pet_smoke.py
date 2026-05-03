@@ -5,6 +5,7 @@ import pytest
 @allure.epic("Pet Store API")
 @allure.feature("Pet")
 @allure.story("Smoke")
+@pytest.mark.smoke
 class TestPetSmoke:
     def test_create_and_get_pet_is_alive(self, pet_client, created_pet):
         """Базовая проверка: можно создать питомца и получить его."""

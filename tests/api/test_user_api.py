@@ -4,6 +4,7 @@ import pytest
 from models.user_model import UserSchema
 
 
+@pytest.mark.api
 class TestUserClientCrud:
     def test_add_user(self, user_client, created_user):
         user = created_user()
@@ -55,7 +56,7 @@ class TestUserClientCrud:
             {"lastName": "NewLastName"},
             {"phone": "123-456-7890"},
         ],
-        ids=["обновить имя", "обновить фамилию", "обновить телефон"],
+        ids=["update name", "update lastname", "update phone"],
     )
     def test_update_user_different_fields(self, user_client, created_user, update_data):
         """Можно обновлять разные поля пользователя."""

@@ -6,6 +6,7 @@ from models.pet_model import PetSchema
 
 @allure.epic("Pet Store API")
 @allure.feature("Pet")
+@pytest.mark.api
 class TestPetClientCrud:
     @pytest.mark.parametrize(
         "kwargs",
