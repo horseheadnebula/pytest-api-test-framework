@@ -3,6 +3,7 @@ import random
 from faker import Faker
 
 from models.pet_model import Category, PetSchema, Tags
+from models.user_model import UserSchema
 
 
 class GeneratePet:
@@ -64,3 +65,47 @@ class GeneratePet:
     # Собераем PetSchema, конвертируем в словарь, поля со значением None выкидываем.
     def build_payload(self) -> dict:
         return self.build().model_dump(exclude_none=True)
+
+
+class GenerateUser:
+    _fake = Faker()
+
+    def __init__(
+        self,
+        user_id: int | None = None,
+        username: str | None = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        email: str | None = None,
+        password: str | None = None,
+        phone: str | None = None,
+        user_status: int | None = None,
+    ):
+        # В атрибуты объекта сохраняем переданные аргументы, если ничего не передали то генерируются рандомные данные.
+        self.user_id = random.randint(1000, 9999) if user_id is None else user_id
+        self.username = GenerateUser._fake.user_name() if username is None else username
+        self.first_name = (
+            GenerateUser._fake.first_name() if first_name is None else first_name
+        )
+        self.last_name = (
+            GenerateUser._fake.last_name() if last_name is None else last_name
+        )
+        self.email = GenerateUser._fake.email() if email is None else email
+        self.password = GenerateUser._fake.password() if password is None else password
+        self.phone = GenerateUser._fake.phone_number() if phone is None else phone
+        self.user_status = random.choice([0, 1]) if user_status is None else user_status
+
+    def build(self) -> UserSchema:
+        return UserSchema(
+            id=self.user_id,
+            username=self.username,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            email=self.email,
+            password=self.password,
+            phone=self.phone,
+            userStatus=self.user_status,
+        )
+
+    def build_payload(self) -> dict:
+        return self.build().model_dump(by_alias=True, exclude_none=True)

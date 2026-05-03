@@ -1,17 +1,24 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class Category(BaseModel):
+class BaseSchema(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        extra="ignore",  # игнор лишних полей от API
+    )
+
+
+class Category(BaseSchema):
     id: int | None = Field(None)
     name: str | None = Field(None)
 
 
-class Tags(BaseModel):
+class Tags(BaseSchema):
     id: int | None = Field(None)
     name: str | None = Field(None)
 
 
-class PetSchema(BaseModel):
+class PetSchema(BaseSchema):
     id: int
     category: Category | None = Field(None)
     name: str

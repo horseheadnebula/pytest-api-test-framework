@@ -6,9 +6,9 @@ import pytest
 @allure.feature("Pet")
 class TestPetClientNegative:
     def test_add_pet_with_empty_payload_returns_error(self, pet_client):
-        response = pet_client.add_pet({})
+        add_resp = pet_client.add_pet({})
 
-        assert response.status_code == 405
+        assert add_resp.status_code == 405
 
     @pytest.mark.parametrize(
         "pet_id",
@@ -16,16 +16,16 @@ class TestPetClientNegative:
         ids=["boundary id = 0", "non-existent id"],
     )
     def test_get_non_existent_pet_returns_not_found(self, pet_client, pet_id):
-        response = pet_client.get_pet(pet_id)
+        get_resp = pet_client.get_pet(pet_id)
 
-        assert response.status_code == 404
+        assert get_resp.status_code == 404
 
     def test_update_pet_without_id_returns_error(self, pet_client):
         payload = {"name": "broken-pet", "photoUrls": ["https://example.com/pet.jpg"]}
 
-        response = pet_client.update_pet(payload)
+        upd_resp = pet_client.update_pet(payload)
 
-        assert response.status_code in (400, 405)
+        assert upd_resp.status_code in (400, 405)
 
     @pytest.mark.parametrize(
         "pet_id",
@@ -33,6 +33,33 @@ class TestPetClientNegative:
         ids=["string id", "negative id"],
     )
     def test_delete_pet_with_invalid_id_returns_error(self, pet_client, pet_id):
-        response = pet_client.delete_pet(pet_id)
+        del_resp = pet_client.delete_pet(pet_id)
 
-        assert response.status_code in (400, 404, 405)
+        assert del_resp.status_code in (400, 404, 405)
+
+    def test_get_pet_with_string_id_returns_error(self, pet_client):
+        """ID питомца должен быть числом, строка — ошибка."""
+        resp = pet_client.get_pet("abc")
+
+        assert resp.status_code == 400  # Bad Request
+
+    @pytest.mark.parametrize(
+        "invalid_name",
+        ["", "a" * 500],
+        ids=["пустое имя", "слишком длинное имя"],
+    )
+    def test_add_pet_with_invalid_name(self, pet_client, pet_factory, invalid_name):
+        """Граничные значения для поля name."""
+        payload = pet_factory(name=invalid_name)
+
+        resp = pet_client.add_pet(payload)
+
+        assert resp.status_code in (400, 405, 422)
+
+    def test_add_pet_with_invalid_status(self, pet_client, pet_factory):
+        """Статус должен быть одним из available/pending/sold."""
+        payload = pet_factory(status="flying")  # несуществующий статус
+
+        resp = pet_client.add_pet(payload)
+
+        assert resp.status_code in (400, 422)
