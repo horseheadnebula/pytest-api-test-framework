@@ -1,8 +1,10 @@
+import logging
+
 import pytest
 
 from api.pet_api import PetApiClient
 from api.user_api import UserApiClient
-from config.payloads import Category, GeneratePet, GenerateUser, Tags
+from config.payloads import GeneratePet, GenerateUser
 from config.settings import BASE_URL
 
 
@@ -20,22 +22,8 @@ def user_client():
 
 @pytest.fixture()
 def pet_factory():
-    def _factory(
-        pet_id: int | None = None,
-        name: str | None = None,
-        status: str | None = None,
-        category: Category | None = None,
-        photo_urls: list[str] | None = None,
-        tags: list[Tags] | None = None,
-    ) -> dict:
-        return GeneratePet(
-            pet_id=pet_id,
-            name=name,
-            status=status,
-            category=category,
-            photo_urls=photo_urls,
-            tags=tags,
-        ).build_payload()
+    def _factory(**kwargs) -> dict:
+        return GeneratePet(**kwargs).build_payload()
 
     return _factory
 
@@ -54,31 +42,17 @@ def created_pet(pet_client, pet_factory):
     yield _factory
 
     for pet_id in created_pet_ids:
-        pet_client.delete_pet(pet_id)
+        resp = pet_client.delete_pet(pet_id)
+        if resp.status_code not in (200, 404):
+            logging.warning(
+                "Cleanup failed for pet_id=%s: %s", pet_id, resp.status_code
+            )
 
 
 @pytest.fixture()
 def user_factory():
-    def _factory(
-        user_id: int | None = None,
-        username: str | None = None,
-        first_name: str | None = None,
-        last_name: str | None = None,
-        email: str | None = None,
-        password: str | None = None,
-        phone: str | None = None,
-        user_status: int | None = None,
-    ) -> dict:
-        return GenerateUser(
-            user_id=user_id,
-            username=username,
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            password=password,
-            phone=phone,
-            user_status=user_status,
-        ).build_payload()
+    def _factory(**kwargs) -> dict:
+        return GenerateUser(**kwargs).build_payload()
 
     return _factory
 
@@ -97,4 +71,8 @@ def created_user(user_client, user_factory):
     yield _factory
 
     for username in created_usernames:
-        user_client.delete_user(username)
+        resp = user_client.delete_user(username)
+        if resp.status_code not in (200, 404):
+            logging.warning(
+                "Cleanup failed for pet_id=%s: %s", username, resp.status_code
+            )

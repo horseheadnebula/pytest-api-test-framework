@@ -1,4 +1,3 @@
-import allure
 import pytest
 
 from models.user_model import UserSchema
@@ -28,17 +27,19 @@ class TestUserClientCrud:
         assert get_resp.status_code == 200, get_resp.json()
         assert user_model.username == user["username"]
 
-    @pytest.mark.parametrize("new_email", [({"email": "new@email.com"})])
-    def test_update_user(self, user_client, created_user, new_email):
+    def test_update_user(self, user_client, created_user):
         user = created_user()
+        new_email = "new@email.com"
 
-        update_resp = user_client.update_user(user["username"], {**user, **new_email})
+        update_resp = user_client.update_user(
+            user["username"], {**user, "email": new_email}
+        )
         updated_user_resp = user_client.get_user(user["username"])
 
         user_model = UserSchema.model_validate(updated_user_resp.json())
 
         assert update_resp.status_code == 200, update_resp.json()
-        assert user_model.email == new_email["email"]
+        assert user_model.email == new_email
 
     def test_delete_user(self, user_client, created_user):
         user = created_user()
@@ -62,6 +63,12 @@ class TestUserClientCrud:
         """Можно обновлять разные поля пользователя."""
         user = created_user()
 
-        resp = user_client.update_user(user["username"], update_data)
+        update_resp = user_client.update_user(user["username"], {**user, **update_data})
+        updated_user_resp = user_client.get_user(user["username"])
 
-        assert resp.status_code == 200
+        assert update_resp.status_code == 200, update_resp.json()
+        assert updated_user_resp.status_code == 200, updated_user_resp.json()
+
+        updated_user = updated_user_resp.json()
+        for key, value in update_data.items():
+            assert updated_user[key] == value, f"Field {key} should be updated"

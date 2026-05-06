@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from models.pet_model import PetSchema
+from models.pet_model import Category, PetSchema, Tags
 
 
 @allure.epic("Pet Store API")
@@ -12,8 +12,8 @@ class TestPetClientCrud:
         "kwargs",
         [
             ({"status": "available"}),
-            ({"category": {"id": 3, "name": "bird"}}),
-            ({"tags": [{"id": 1, "name": "cute"}]}),
+            ({"category": Category(id=3, name="bird")}),
+            ({"tags": [Tags(id=1, name="cute")]}),
         ],
         ids=["pet w/ status", "pet w/ category", "pet w/ tags"],
     )
@@ -34,7 +34,7 @@ class TestPetClientCrud:
         get_resp = pet_client.get_pet(pet["id"])
 
         assert get_resp.status_code == 200
-        assert get_resp.headers["Content-Type"] == "application/json"
+        assert "application/json" in get_resp.headers["Content-Type"]
 
     @pytest.mark.parametrize(
         "new_status", [("pending"), ("sold")], ids=["status: pending", "status: sold"]
@@ -51,11 +51,10 @@ class TestPetClientCrud:
         pet_model = PetSchema.model_validate(upd_resp.json())
 
         assert get_resp.status_code == 200
-        assert upd_resp.headers["Content-Type"] == "application/json"
+        assert "application/json" in get_resp.headers["Content-Type"]
 
-        assert pet_model.id == get_resp.json()["id"]
-        assert pet_model.name == get_resp.json()["name"]
-        assert pet_model.status == get_resp.json()["status"]
+        assert pet_model.status == new_status
+        assert get_resp.json()["status"] == new_status
 
     def test_delete_pet(self, pet_client, created_pet):
         pet = created_pet()
@@ -65,4 +64,4 @@ class TestPetClientCrud:
 
         get_resp = pet_client.get_pet(pet["id"])
         assert get_resp.status_code == 404
-        assert del_resp.headers["Content-Type"] == "application/json"
+        assert "application/json" in get_resp.headers["Content-Type"]

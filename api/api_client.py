@@ -1,6 +1,5 @@
 import logging
 import time
-from typing import Optional
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -10,6 +9,8 @@ logger = logging.getLogger(__name__)
 
 
 class BaseApiClient:
+    _RETRY_STATUSES = (500, 502, 503, 504)
+
     def __init__(
         self,
         url: str,
@@ -21,12 +22,10 @@ class BaseApiClient:
         self.timeout = timeout
         self.session = requests.Session()
 
-        RETRY_STATUSES = (500, 502, 503, 504)
-
         retry_strategy = Retry(
             total=retries,  # сколько попыток
             backoff_factor=backoff_factor,  # задержка между повторами
-            status_forcelist=RETRY_STATUSES,  # когда делать retry
+            status_forcelist=self._RETRY_STATUSES,  # когда делать retry
             allowed_methods=["GET", "POST", "PUT", "DELETE"],
         )
 
@@ -54,7 +53,7 @@ class BaseApiClient:
 
         return response
 
-    def get(self, path: str, params: Optional[dict] = None):
+    def get(self, path: str, params: dict | None = None):
         return self._request("GET", path, params=params)
 
     def post(self, path: str, json: dict):

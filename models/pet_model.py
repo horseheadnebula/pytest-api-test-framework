@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import Field
 
 from models.base_model import BaseSchema
@@ -17,6 +19,6 @@ class PetSchema(BaseSchema):
     id: int
     category: Category | None = Field(None)
     name: str
-    photo_urls: list[str] | None = Field(default_factory=list)
+    photo_urls: list[str] | None = Field(default_factory=list, alias="photoUrls")
     tags: list[Tags] | None = Field(default_factory=list)
-    status: str
+    status: Literal["available", "pending", "sold"] = Field(...)

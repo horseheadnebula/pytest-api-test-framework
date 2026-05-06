@@ -1,4 +1,5 @@
 import random
+from typing import Literal, cast
 
 from faker import Faker
 
@@ -13,16 +14,19 @@ class GeneratePet:
         self,
         pet_id: int | None = None,
         name: str | None = None,
-        status: str | None = None,
+        status: Literal["available", "pending", "sold"] | None = None,
         category: Category | None = None,
         photo_urls: list[str] | None = None,
         tags: list[Tags] | None = None,
     ):
         # В атрибуты объекта сохраняем переданные аргументы, если ничего не передали то генерируются рандомные данные.
-        self.pet_id = random.randint(1000, 9999) if pet_id is None else pet_id
+        self.pet_id = random.randint(100_000, 999_999) if pet_id is None else pet_id
         self.name = GeneratePet._fake.first_name() if name is None else name
         self.status = (
-            random.choice(["available", "pending", "sold"])
+            cast(
+                Literal["available", "pending", "sold"],
+                random.choice(["available", "pending", "sold"]),
+            )
             if status is None
             else status
         )
@@ -58,13 +62,13 @@ class GeneratePet:
             name=self.name,
             status=self.status,
             category=self.category,
-            photo_urls=self.photo_urls,
+            photoUrls=self.photo_urls,
             tags=self.tags,
         )
 
     # Собераем PetSchema, конвертируем в словарь, поля со значением None выкидываем.
     def build_payload(self) -> dict:
-        return self.build().model_dump(exclude_none=True)
+        return self.build().model_dump(by_alias=True, exclude_none=True)
 
 
 class GenerateUser:
@@ -99,8 +103,8 @@ class GenerateUser:
         return UserSchema(
             id=self.user_id,
             username=self.username,
-            first_name=self.first_name,
-            last_name=self.last_name,
+            firstName=self.first_name,
+            lastName=self.last_name,
             email=self.email,
             password=self.password,
             phone=self.phone,
