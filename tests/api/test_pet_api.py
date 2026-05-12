@@ -33,8 +33,11 @@ class TestPetClientCrud:
 
         get_resp = pet_client.get_pet(pet["id"])
 
+        pet_model = PetSchema.model_validate(get_resp.json())
+
         assert get_resp.status_code == 200
         assert "application/json" in get_resp.headers["Content-Type"]
+        assert pet_model.id == pet["id"]
 
     @pytest.mark.parametrize(
         "new_status", [("pending"), ("sold")], ids=["status: pending", "status: sold"]

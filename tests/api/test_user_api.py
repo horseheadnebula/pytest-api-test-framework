@@ -1,8 +1,12 @@
+import allure
 import pytest
 
+from config.factories import GenerateUser
 from models.user_model import UserSchema
 
 
+@allure.epic("Pet Store API")
+@allure.feature("User")
 @pytest.mark.api
 class TestUserClientCrud:
     def test_add_user(self, user_client, created_user):
@@ -29,7 +33,7 @@ class TestUserClientCrud:
 
     def test_update_user(self, user_client, created_user):
         user = created_user()
-        new_email = "new@email.com"
+        new_email = GenerateUser._fake.email()
 
         update_resp = user_client.update_user(
             user["username"], {**user, "email": new_email}

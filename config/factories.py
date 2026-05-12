@@ -22,7 +22,7 @@ class GeneratePet:
         # В атрибуты объекта сохраняем переданные аргументы, если ничего не передали то генерируются рандомные данные.
         self.pet_id = random.randint(100_000, 999_999) if pet_id is None else pet_id
         self.name = GeneratePet._fake.first_name() if name is None else name
-        self.status = (
+        self.status: Literal["available", "pending", "sold"] = (
             cast(
                 Literal["available", "pending", "sold"],
                 random.choice(["available", "pending", "sold"]),

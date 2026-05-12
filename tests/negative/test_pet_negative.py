@@ -79,7 +79,10 @@ class TestPetClientNegative:
     )
     def test_add_pet_with_invalid_status(self, pet_client, pet_factory):
         """Статус должен быть одним из available/pending/sold."""
-        payload = pet_factory(status="flying")  # несуществующий статус
+        payload = pet_factory()
+        payload["status"] = (
+            "flying"  # подменяем после Pydantic-валидации, чтобы невалидные данные дошли до API
+        )
 
         resp = pet_client.add_pet(payload)
 

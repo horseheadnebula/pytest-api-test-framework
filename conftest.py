@@ -4,7 +4,7 @@ import pytest
 
 from api.pet_api import PetApiClient
 from api.user_api import UserApiClient
-from config.payloads import GeneratePet, GenerateUser
+from config.factories import GeneratePet, GenerateUser
 from config.settings import BASE_URL
 
 
