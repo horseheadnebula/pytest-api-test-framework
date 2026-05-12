@@ -17,7 +17,16 @@ class TestPetClientNegative:
 
     @pytest.mark.parametrize(
         "pet_id",
-        [0, 999999999],
+        [
+            0,
+            pytest.param(
+                999999999,
+                marks=pytest.mark.xfail(
+                    reason="Petstore возвращает 200 для несуществующих больших ID, баг на стороне API",
+                    strict=True,
+                ),
+            ),
+        ],
         ids=["boundary id = 0", "non-existent id"],
     )
     def test_get_non_existent_pet_returns_not_found(self, pet_client, pet_id):
