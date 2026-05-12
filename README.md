@@ -23,18 +23,18 @@ pytest-api-test-framework/
 │   └── user_api.py         # User эндпоинты
 ├── config/
 │   ├── settings.py         # URL окружений, конфигурация
-│   └── payloads.py         # Генераторы тестовых данных
+│   └── factories.py        # Генераторы тестовых данных
 ├── models/
 │   ├── pet_model.py        # Pydantic схема питомца
 │   └── user_model.py       # Pydantic схема пользователя
 ├── tests/
 │   ├── api/                # Happy path CRUD тесты
 │   ├── negative/           # Негативные сценарии
-│   ├── smoke/              # Базовые проверки доступности API
-│   └── regression/         # Тесты на найденные баги
+│   └── smoke/              # Базовые проверки доступности API
 ├── conftest.py             # Фикстуры (клиенты, фабрики, cleanup)
 ├── pytest.ini
-└── requirements.txt
+├── requirements.in         # Прямые зависимости (редактируется вручную)
+└── requirements.txt        # Полный lockfile (генерируется pip-compile)
 ```
 
 ## Installation
@@ -60,6 +60,21 @@ ENV=prod pytest
 ```
 
 Базовые URL настраиваются в `config/settings.py`.
+
+## Dependency Management
+
+Зависимости разделены на прямые и транзитивные с помощью [pip-tools](https://github.com/jazzband/pip-tools).
+
+```bash
+# Добавить новую зависимость — вписать в requirements.in, затем:
+pip-compile requirements.in
+
+# Обновить все зависимости до последних совместимых версий:
+pip-compile --upgrade requirements.in
+```
+
+`requirements.in` — редактируется вручную (только прямые зависимости).
+`requirements.txt` — генерируется автоматически, коммитится в репозиторий.
 
 ## Running Tests
 
